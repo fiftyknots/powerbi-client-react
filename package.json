@@ -6,7 +6,8 @@
     "packages/token-api"
   ],
   "scripts": {
-    "start": "concurrently \"npm:start --workspace=token-api\" \"npm:start --workspace=react-client\""
+    "start": "concurrently \"npm:start --workspace=token-api\" \"npm:start --workspace=react-client\"",
+    "dev": "npm run start"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
