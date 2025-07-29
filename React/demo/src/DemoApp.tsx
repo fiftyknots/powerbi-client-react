@@ -9,6 +9,8 @@ import 'powerbi-report-authoring';
 
 import './DemoApp.css';
 import EmbedConfigDialog from './components/embed-config-dialog/EmbedConfigDialogComponent';
+// TokenType type for dialog
+type TokenType = 'Aad' | 'Embed';
 import EventDetailsDialog from './components/event-details-dialog/EventDetailsDialogComponent';
 import { sampleTheme } from './constants/constants';
 
@@ -39,13 +41,14 @@ function DemoApp (): JSX.Element {
 
 	// Pass the basic embed configurations to the embedded component to bootstrap the report on first load
 	// Values for properties like embedUrl, accessToken and settings will be set on click of button
-	const [sampleReportConfig, setReportConfig] = useState<models.IReportEmbedConfiguration>({
-		type: 'report',
-		embedUrl: undefined,
-		tokenType: models.TokenType.Aad,
-		accessToken: undefined,
-		settings: undefined,
-	});
+const [sampleReportConfig, setReportConfig] = useState<models.IReportEmbedConfiguration>({
+  type: 'report',
+  embedUrl: undefined,
+  tokenType: models.TokenType.Aad,
+  accessToken: undefined,
+  settings: undefined,
+});
+const [selectedTokenType, setSelectedTokenType] = useState<TokenType>('Aad');
 
 	/**
 	 * Map of event handlers to be applied to the embedded report
@@ -76,24 +79,25 @@ function DemoApp (): JSX.Element {
 	/**
 	 * Embeds report
 	 */
-	const embedReport = (embedUrl: string, accessToken: string): void => {
-		// Update the reportConfig to embed the PowerBI report
-		setReportConfig({
-			...sampleReportConfig,
-			embedUrl,
-			accessToken
-		});
-		setIsEmbedded(true);
-
-		setMessage('Use the buttons above to interact with the report using Power BI Client APIs.');
-		setIsEmbedConfigDialogOpen(false);
-	};
+const embedReport = (embedUrl: string, accessToken: string, tokenType: TokenType): void => {
+  // Update the reportConfig to embed the PowerBI report
+  setReportConfig({
+	...sampleReportConfig,
+	embedUrl,
+	accessToken,
+	tokenType: tokenType === 'Aad' ? models.TokenType.Aad : models.TokenType.Embed
+  });
+  setSelectedTokenType(tokenType);
+  setIsEmbedded(true);
+  setMessage('Use the buttons above to interact with the report using Power BI Client APIs.');
+  setIsEmbedConfigDialogOpen(false);
+};
 
 	/**
- 	 * Toggle Filter Pane
- 	 *
- 	 * @returns Promise<IHttpPostMessageResponse<void> | undefined>
- 	 */
+	 * Toggle Filter Pane
+	 *
+	 * @returns Promise<IHttpPostMessageResponse<void> | undefined>
+	 */
 	const toggleFilterPane = async (): Promise<IHttpPostMessageResponse<void> | undefined> => {
 		if (!report) {
 			setDisplayMessageAndConsole('Report not available');
@@ -125,7 +129,7 @@ function DemoApp (): JSX.Element {
 
 	/**
 	 * Handles the visibility and details of the data-selected event dialog.
- 	 */
+	 */
 	const dataSelectedEventDetailsDialog = (dataSelectedEventDetails: any): void => {
 		setDataSelectedEventDetails(dataSelectedEventDetails);
 		setIsEventDetailsDialogVisible(true);
@@ -133,7 +137,7 @@ function DemoApp (): JSX.Element {
 
 	/**
 	 * Set data selected event
- 	 */
+	 */
 	const setDataSelectedEvent = () => {
 		const dataSelectedEvent = !isDataSelectedEvent;
 		setIsDataSelectedEvent(dataSelectedEvent);
@@ -159,7 +163,7 @@ function DemoApp (): JSX.Element {
 	}
 
 	/**
- 	 * Toggle theme
+	 * Toggle theme
 	 *
 	 * @returns Promise<void>
 	 */
@@ -237,8 +241,8 @@ function DemoApp (): JSX.Element {
 
 
 	/**
-     * Set display message and log it in the console
-     */
+	 * Set display message and log it in the console
+	 */
 	const setDisplayMessageAndConsole = (message: string): void => {
 		setMessage(message);
 		console.log(message);
@@ -316,11 +320,11 @@ function DemoApp (): JSX.Element {
 				{ isEmbedded ? reportComponent : null }
 			</div>
 
-			<EmbedConfigDialog
-				isOpen = {isEmbedConfigDialogOpen}
-				onRequestClose = {() => setIsEmbedConfigDialogOpen(false)}
-				onEmbed = {embedReport}
-			/>
+<EmbedConfigDialog
+  isOpen = {isEmbedConfigDialogOpen}
+  onRequestClose = {() => setIsEmbedConfigDialogOpen(false)}
+  onEmbed = {embedReport}
+/>
 
 			<EventDetailsDialog
 				isOpen = {isEventDetailsDialogVisible}
