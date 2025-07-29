@@ -1,7 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import { verify } from 'https://deno.land/x/djwt@v3.0.1/mod.ts'
-import { create } from 'https://deno.land/x/djwt@v3.0.1/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -158,7 +156,7 @@ async function generatePowerBIEmbedToken(accessToken: string, workspaceId: strin
 /**
  * Verifies Supabase JWT token
  */
-async function verifySupabaseJWT(authHeader: string): Promise<any> {
+async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new Error('Missing or invalid Authorization header')
   }
@@ -171,10 +169,10 @@ async function verifySupabaseJWT(authHeader: string): Promise<any> {
   }
 
   try {
-    // Convert the JWT secret to the proper format for verification
+    // Convert the JWT secret from base64 to the proper format for verification
     const key = await crypto.subtle.importKey(
       'raw',
-      new TextEncoder().encode(jwtSecret),
+      new Uint8Array(atob(jwtSecret).split('').map(c => c.charCodeAt(0))),
       { name: 'HMAC', hash: 'SHA-256' },
       false,
       ['verify']

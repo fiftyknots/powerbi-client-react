@@ -66,7 +66,7 @@ supabase secrets set SUPABASE_JWT_SECRET=your-jwt-secret
 ### 5. Deploy the Edge Function
 
 ```bash
-supabase functions deploy get-powerbi-embed-config
+supabase functions deploy get-powerbi-embed-config --no-verify-jwt
 ```
 
 ### 6. Install Dependencies and Start the Application
@@ -116,7 +116,7 @@ supabase secrets set AZURE_CLIENT_ID=your-service-principal-client-id --project-
 ### 4. Deploy Edge Function to Production
 
 ```bash
-supabase functions deploy get-powerbi-embed-config --project-ref your-project-ref
+supabase functions deploy get-powerbi-embed-config --no-verify-jwt --project-ref your-project-ref
 ```
 
 ### 5. Build and Deploy Frontend
