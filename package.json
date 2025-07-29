@@ -3,7 +3,7 @@
 	"version": "1.1.0",
 	"description": "Demo for usage of powerbi-client-react",
 	"scripts": {
-		"demo": "webpack-dev-server --static ./src/ --open"
+		"dev": "webpack-dev-server --static ./src/ --open"
 	},
 	"license": "MIT",
 	"dependencies": {
