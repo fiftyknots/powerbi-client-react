@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { models, Report } from 'powerbi-client';
 import { PowerBIEmbed } from 'powerbi-client-react';
+import { Auth } from '@supabase/auth-ui-react';
+import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from './supabaseClient';
 import './App.css';
 
@@ -107,28 +109,6 @@ const App: React.FC = () => {
     }
   };
 
-  const handleSignIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-    }
-  };
-
-  const handleSignUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
-
-    if (error) {
-      setError(error.message);
-    }
-  };
-
   const handleSignOut = async () => {
     const { error } = await supabase.auth.signOut();
     if (error) {
@@ -163,7 +143,27 @@ const App: React.FC = () => {
   }
 
   if (!session) {
-    return <AuthForm onSignIn={handleSignIn} onSignUp={handleSignUp} error={error} />;
+    return (
+      <div className="auth-container">
+        <div className="auth-form">
+          <h2>Welcome to Secure Power BI Dashboard</h2>
+          {error && (
+            <div className="error-message">
+              {error}
+              <button onClick={() => setError(null)} className="close-error">
+                ×
+              </button>
+            </div>
+          )}
+          <Auth
+            supabaseClient={supabase}
+            appearance={{ theme: ThemeSupa }}
+            providers={[]}
+            redirectTo={window.location.origin}
+          />
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -231,76 +231,6 @@ const App: React.FC = () => {
           </div>
         )}
       </main>
-    </div>
-  );
-};
-
-interface AuthFormProps {
-  onSignIn: (email: string, password: string) => void;
-  onSignUp: (email: string, password: string) => void;
-  error: string | null;
-}
-
-const AuthForm: React.FC<AuthFormProps> = ({ onSignIn, onSignUp, error }) => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isSignUp, setIsSignUp] = useState(false);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (isSignUp) {
-      onSignUp(email, password);
-    } else {
-      onSignIn(email, password);
-    }
-  };
-
-  return (
-    <div className="auth-container">
-      <div className="auth-form">
-        <h2>{isSignUp ? 'Sign Up' : 'Sign In'}</h2>
-        
-        {error && <div className="error-message">{error}</div>}
-        
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">Email:</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </div>
-          
-          <div className="form-group">
-            <label htmlFor="password">Password:</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </div>
-          
-          <button type="submit" className="auth-btn">
-            {isSignUp ? 'Sign Up' : 'Sign In'}
-          </button>
-        </form>
-        
-        <p>
-          {isSignUp ? 'Already have an account?' : "Don't have an account?"}{' '}
-          <button
-            type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
-            className="toggle-auth"
-          >
-            {isSignUp ? 'Sign In' : 'Sign Up'}
-          </button>
-        </p>
-      </div>
     </div>
   );
 };
