@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
   mode: 'development',
@@ -34,5 +35,11 @@ module.exports = {
     port: 3002,
     hot: true,
     historyApiFallback: true
-  }
+  },
+  plugins: [
+    new webpack.DefinePlugin({
+      'process.env.REACT_APP_SUPABASE_URL': JSON.stringify(process.env.REACT_APP_SUPABASE_URL),
+      'process.env.REACT_APP_SUPABASE_ANON_KEY': JSON.stringify(process.env.REACT_APP_SUPABASE_ANON_KEY)
+    })
+  ]
 };
