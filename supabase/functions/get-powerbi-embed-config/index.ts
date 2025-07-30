@@ -178,7 +178,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
       ['verify']
     )
 
-    console.log(`token: ${JSON.stringify(token, null, 2)}`);
+    // console.log(`token: ${JSON.stringify(token, null, 2)}`);
     
     const payload = await verify(token, key)
     console.log('✅ JWT verified successfully for user:', payload.sub)
