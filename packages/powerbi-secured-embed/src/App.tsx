@@ -3,6 +3,7 @@ import { Session, User } from '@supabase/supabase-js';
 import { models, Report } from 'powerbi-client';
 import { PowerBIEmbed } from 'powerbi-client-react';
 import { supabase } from './supabaseClient';
+import AuthDebug from './components/AuthDebug';
 import './App.css';
 
 interface EmbedConfig {
@@ -168,6 +169,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
+      <AuthDebug session={session} />
       <header className="app-header">
         <h1>Secure Power BI Dashboard</h1>
         <div className="user-info">
