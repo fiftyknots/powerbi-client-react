@@ -172,18 +172,15 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   console.log('DEBUG: jwtSecret length: ' + jwtSecret.length);
 
   try {
-    // Convert the JWT secret from base64 to the proper format for verification
-    const key = await crypto.subtle.importKey(
-      'raw',
-      new Uint8Array(atob(jwtSecret).split('').map(c => c.charCodeAt(0))),
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['verify']
-    )
+    // Convert the base64 secret to a Uint8Array
+    // This is the raw byte representation of your secret
+    const rawSecretBytes = new Uint8Array(atob(jwtSecret).split('').map(c => c.charCodeAt(0)));
 
     console.log(`DEBUG: token: '${token}''`);
     
-    const payload = await verify(token, key)
+    // Pass the Uint8Array directly to the verify function.
+    // The djwt library will handle the key import internally.
+    const payload = await verify(token, rawSecretBytes)
     console.log('✅ JWT verified successfully for user:', payload.sub)
     
     return payload
