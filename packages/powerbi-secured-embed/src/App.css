@@ -141,6 +141,63 @@
   color: #333;
 }
 
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: #555;
+  font-weight: 500;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-color: #117865;
+  box-shadow: 0 0 0 2px rgba(17, 120, 101, 0.2);
+}
+
+.auth-btn {
+  width: 100%;
+  background: #117865;
+  color: white;
+  border: none;
+  padding: 0.75rem;
+  border-radius: 4px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-bottom: 1rem;
+}
+
+.auth-btn:hover {
+  background: #0f6b5a;
+}
+
+.toggle-auth {
+  background: none;
+  border: none;
+  color: #117865;
+  cursor: pointer;
+  text-decoration: underline;
+  font-size: inherit;
+}
+
+.toggle-auth:hover {
+  color: #0f6b5a;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
   .app-header {
