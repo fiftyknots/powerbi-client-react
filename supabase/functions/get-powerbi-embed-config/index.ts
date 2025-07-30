@@ -179,8 +179,17 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
     console.log('DEBUG: rawSecretBytes (hex):', Array.from(rawSecretBytes).map(b => b.toString(16).padStart(2, '0')).join(''));
     console.log(`DEBUG: token: '${token}'`);
     
-    // Pass the Uint8Array directly to the verify function
-    const payload = await verify(token, rawSecretBytes);
+    // Create a CryptoKey object for HMAC-SHA256 operations
+    const cryptoKey = await crypto.subtle.importKey(
+      'raw',
+      rawSecretBytes,
+      { name: 'HMAC', hash: 'SHA-256' },
+      false,
+      ['sign', 'verify']
+    );
+    
+    // Pass the CryptoKey to the verify function
+    const payload = await verify(token, cryptoKey);
     console.log('✅ JWT verified successfully.', payload);
     
     return payload
