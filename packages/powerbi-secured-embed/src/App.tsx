@@ -169,7 +169,7 @@ const App: React.FC = () => {
 
   return (
     <div className="app-container">
-      <AuthDebug session={session} />
+      {/*<AuthDebug session={session} />*/}
       <header className="app-header">
         <h1>Secure Power BI Dashboard</h1>
         <div className="user-info">
