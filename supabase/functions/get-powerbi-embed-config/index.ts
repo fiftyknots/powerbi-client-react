@@ -173,7 +173,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
 
   try {
     // Convert the base64 secret to a Uint8Array
-    // This is the raw byte representation of your secret
+    // This is the raw byte representation of your secret 
     const rawSecretBytes = new Uint8Array(atob(jwtSecret).split('').map(c => c.charCodeAt(0)));
 
     console.log(`DEBUG: token: '${token}''`);
