@@ -185,7 +185,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
       rawSecretBytes,
       { name: 'HMAC', hash: 'SHA-256' },
       false,
-      ['sign', 'verify']
+      ['verify']
     );
     
     // Pass the CryptoKey to the verify function
