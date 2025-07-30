@@ -8,6 +8,4 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables. Please copy .env.example to .env and configure your Supabase project details.');
 }
 
-console.debug(`SUPABASE_URL: ${supabaseUrl}`);
-console.debug(`SUPABBASE_ANON_KEY: ${supabaseAnonKey}`);
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
