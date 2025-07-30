@@ -176,12 +176,12 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
     // This is the raw byte representation of your secret 
     const rawSecretBytes = new Uint8Array(atob(jwtSecret).split('').map(c => c.charCodeAt(0)));
 
-    console.log(`DEBUG: token: '${token}''`);
+    console.log(`DEBUG: token: '${token}'`);
     
     // Pass the Uint8Array directly to the verify function.
     // The djwt library will handle the key import internally.
-    const payload = await verify(token, rawSecretBytes)
-    console.log('✅ JWT verified successfully for user:', payload.sub)
+    const payload = await verify(token, rawSecretBytes);
+    console.log('✅ JWT verified successfully.', payload);
     
     return payload
   } catch (error) {
