@@ -5,7 +5,7 @@
   "scripts": {
     "start": "webpack-dev-server --static ./src/ --open",
     "build": "webpack --mode production",
-    "dev": "webpack-dev-server --mode development"
+    "dev": "webpack-dev-server --mode development --static ./src/ --open"
   },
   "license": "MIT",
   "dependencies": {
