@@ -1,5 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { verify } from 'https://deno.land/x/djwt@v3.0.1/mod.ts'
+import { decodeBase64 } from 'https://deno.land/std@0.168.0/encoding/base64.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*', 
@@ -171,14 +172,14 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   console.log('DEBUG: jwtSecret from env: \'' + jwtSecret + '\'.');
 
   try {
-    // Convert the base64 secret to a Uint8Array
-    // This is the raw byte representation of your secret 
-    const rawSecretBytes = new Uint8Array(atob(jwtSecret).split('').map(c => c.charCodeAt(0)));
+    // Convert the base64 secret to a Uint8Array using Deno's native function
+    const rawSecretBytes = decodeBase64(jwtSecret);
 
+    // Log raw bytes as hex string for debugging
+    console.log('DEBUG: rawSecretBytes (hex):', Array.from(rawSecretBytes).map(b => b.toString(16).padStart(2, '0')).join(''));
     console.log(`DEBUG: token: '${token}'`);
     
-    // Pass the Uint8Array directly to the verify function.
-    // The djwt library will handle the key import internally.
+    // Pass the Uint8Array directly to the verify function
     const payload = await verify(token, rawSecretBytes);
     console.log('✅ JWT verified successfully.', payload);
     
