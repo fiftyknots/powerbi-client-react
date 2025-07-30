@@ -162,10 +162,10 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   }
 
   const token = authHeader.substring(7) // Remove 'Bearer ' prefix
-  const jwtSecret = Deno.env.get('SUPABASE_JWT_SECRET')
+  const jwtSecret = Deno.env.get('_SUPABASE_JWT_SECRET')
 
   if (!jwtSecret) {
-    throw new Error('Missing SUPABASE_JWT_SECRET environment variable')
+    throw new Error('Missing _SUPABASE_JWT_SECRET environment variable')
   }
 
   try {
