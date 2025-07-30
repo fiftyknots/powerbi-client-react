@@ -9,7 +9,7 @@
   "scripts": {
     "start": "concurrently \"npm:start --workspace=token-api\" \"npm:start --workspace=react-client\"",
     "dev": "npm run start:secured-embed",
-    "start:secured-embed": "npm start --workspace=powerbi-secured-embed"
+    "start:secured-embed": "npm run dev --workspace=powerbi-secured-embed"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
