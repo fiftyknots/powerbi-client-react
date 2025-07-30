@@ -178,13 +178,15 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
       ['verify']
     )
 
+    console.log(`token: ${JSON.stringify(token, null, 2)}`);
+    
     const payload = await verify(token, key)
     console.log('✅ JWT verified successfully for user:', payload.sub)
     
     return payload
   } catch (error) {
     console.error('❌ JWT verification failed:', error.message)
-    // throw new Error('Invalid or expired token')
+    throw new Error('Invalid or expired token')
   }
 }
 
