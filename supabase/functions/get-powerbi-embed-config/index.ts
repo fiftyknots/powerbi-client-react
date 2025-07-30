@@ -169,7 +169,6 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   }
 
   console.log('DEBUG: jwtSecret from env: \'' + jwtSecret + '\'.');
-  console.log('DEBUG: jwtSecret length: ' + jwtSecret.length);
 
   try {
     // Convert the base64 secret to a Uint8Array
@@ -185,6 +184,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
     
     return payload
   } catch (error) {
+    console.error(error);
     console.error('❌ JWT verification failed:', error.message)
     throw new Error('Invalid or expired token')
   }
@@ -205,6 +205,7 @@ serve(async (req) => {
     // Verify authentication
     const authHeader = req.headers.get('Authorization')
     const jwtPayload = await verifySupabaseJWT(authHeader || '')
+    console.log('XXX');
     
     // Extract user information from JWT
     const userId = jwtPayload.sub
