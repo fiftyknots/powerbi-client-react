@@ -168,7 +168,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
     throw new Error('Missing _SUPABASE_JWT_SECRET environment variable')
   }
 
-  console.log('DEBUG: jwtSecret from env: \'', jwtSecret + '\''.');
+  console.log('DEBUG: jwtSecret from env: \'', jwtSecret + '\'.');
   console.log('DEBUG: jwtSecret length: ', jwtSecret.length);
 
   try {
