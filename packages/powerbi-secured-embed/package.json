@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "description": "Secure Power BI embedding with Supabase authentication",
   "scripts": {
-    "start": "webpack-dev-server --static ./src/ --open",
+    "start": "dotenv -e ./.env -- webpack-dev-server --static ./src/ --open",
     "build": "webpack --mode production",
-    "dev": "webpack-dev-server --mode development --static ./src/ --open"
+    "dev": "dotenv -e ./.env -- webpack-dev-server --mode development --static ./src/ --open"
   },
   "license": "MIT",
   "dependencies": {
