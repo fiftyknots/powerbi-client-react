@@ -168,8 +168,8 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
     throw new Error('Missing _SUPABASE_JWT_SECRET environment variable')
   }
 
-  console.log('DEBUG: jwtSecret from env: \'', jwtSecret + '\'.');
-  console.log('DEBUG: jwtSecret length: ', jwtSecret.length);
+  console.log('DEBUG: jwtSecret from env: \'' + jwtSecret + '\'.');
+  console.log('DEBUG: jwtSecret length: ' + jwtSecret.length);
 
   try {
     // Convert the JWT secret from base64 to the proper format for verification
