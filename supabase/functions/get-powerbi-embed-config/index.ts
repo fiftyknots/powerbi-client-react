@@ -166,7 +166,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   // Supabase URL is available as an environment variable in Edge Functions
   const supabaseUrl = Deno.env.get('SUPABASE_URL')
   // Construct the JWKS URL
-  const jwksUrl = new URL('/auth/v1/keys', supabaseUrl)
+  const jwksUrl = new URL('/auth/v1/.well-known/jwks.json', supabaseUrl)
   console.log('DEBUG: JWKS URL:', jwksUrl.toString())
 
   // Create a remote JWK set
@@ -174,9 +174,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
 
   try {
     // Verify the JWT using jose and the remote JWK set
-    const { payload } = await jwtVerify(token, JWKS, {
-      algorithms: ['HS256'], // Supabase typically uses RS256 for JWKS
-    })
+    const { payload } = await jwtVerify(token, JWKS)
     
   } catch (error) {
     console.error(error);
