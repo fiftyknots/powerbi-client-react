@@ -163,58 +163,21 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   }
 
   const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+  
   const jwtSecret = Deno.env.get('_SUPABASE_JWT_SECRET')
-
   if (!jwtSecret) {
     throw new Error('Missing _SUPABASE_JWT_SECRET environment variable')
   }
 
-  console.log('DEBUG: jwtSecret from env (first 10 chars):', jwtSecret.substring(0, 10) + '...');
-  console.log('DEBUG: jwtSecret length:', jwtSecret.length);
-
   try {
     // Decode the base64 secret into a Uint8Array
     const rawSecretBytes = decode(jwtSecret);
-    // Try different approaches to pass the secret
-    // Log raw bytes as hex string for debugging
-    
-    // First try: Pass the base64 string directly
-    try {
-      const payload = await verify(token, jwtSecret)
-      console.log('✅ JWT verified successfully with base64 string secret')
-      return payload
-    } catch (error) {
-      console.log('❌ Base64 string verification failed:', error.message)
-    }
-    
-    // Second try: Decode base64 and pass as Uint8Array
-    try {
-      const rawSecretBytes = decode(jwtSecret)
-      console.log('DEBUG: rawSecretBytes (hex):', Array.from(rawSecretBytes).map(b => b.toString(16).padStart(2, '0')).join(''))
-      
-      const payload = await verify(token, rawSecretBytes)
-      console.log('✅ JWT verified successfully with Uint8Array secret')
-      return payload
-    } catch (error) {
-      console.log('❌ Uint8Array verification failed:', error.message)
-    }
-    
-    // Third try: Create CryptoKey and use that
-    try {
-      const rawSecretBytes = decode(jwtSecret)
-      const cryptoKey = await crypto.subtle.importKey(
-        'raw',
-        rawSecretBytes,
-        { name: 'HMAC', hash: 'SHA-256' },
-      )
-    }
+
     // Verify the JWT using jose
     // jose's jwtVerify expects a Uint8Array for HMAC secrets
     const { payload } = await jwtVerify(token, rawSecretBytes, {
       algorithms: ['HS256'], // Specify the expected algorithm
     });
-    // If all methods fail, throw an error
-    throw new Error('All JWT verification methods failed')
     
   } catch (error) {
     console.error(error);
