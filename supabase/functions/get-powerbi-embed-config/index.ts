@@ -1,6 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { decode } from 'https://deno.land/std@0.168.0/encoding/base64.ts'
-import { jwtVerify } from 'https://deno.land/x/jose@v5.2.0/index.ts'
+import { jwtVerify, createRemoteJWKSet } from 'https://deno.land/x/jose@v4.15.5/index.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*', 
@@ -155,7 +154,7 @@ async function generatePowerBIEmbedToken(accessToken: string, workspaceId: strin
 }
 
 /**
- * Verifies Supabase JWT token
+ * Verifies Supabase JWT token using JWKS endpoint
  */
 async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -163,21 +162,21 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   }
 
   const token = authHeader.substring(7) // Remove 'Bearer ' prefix
-  
-  const jwtSecret = Deno.env.get('_SUPABASE_JWT_SECRET')
-  if (!jwtSecret) {
-    throw new Error('Missing _SUPABASE_JWT_SECRET environment variable')
-  }
+
+  // Supabase URL is available as an environment variable in Edge Functions
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  // Construct the JWKS URL
+  const jwksUrl = new URL('/auth/v1/keys', supabaseUrl)
+  console.log('DEBUG: JWKS URL:', jwksUrl.toString())
+
+  // Create a remote JWK set
+  const JWKS = createRemoteJWKSet(jwksUrl)
 
   try {
-    // Decode the base64 secret into a Uint8Array
-    const rawSecretBytes = decode(jwtSecret);
-
-    // Verify the JWT using jose
-    // jose's jwtVerify expects a Uint8Array for HMAC secrets
-    const { payload } = await jwtVerify(token, rawSecretBytes, {
-      algorithms: ['HS256'], // Specify the expected algorithm
-    });
+    // Verify the JWT using jose and the remote JWK set
+    const { payload } = await jwtVerify(token, JWKS, {
+      algorithms: ['RS256'], // Supabase typically uses RS256 for JWKS
+    })
     
   } catch (error) {
     console.error(error);
@@ -201,7 +200,6 @@ serve(async (req) => {
     // Verify authentication
     const authHeader = req.headers.get('Authorization')
     const jwtPayload = await verifySupabaseJWT(authHeader || '')
-    console.log('XXX');
     
     // Extract user information from JWT
     const userId = jwtPayload.sub
