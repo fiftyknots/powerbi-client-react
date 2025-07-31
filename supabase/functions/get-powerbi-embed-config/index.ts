@@ -246,13 +246,7 @@ serve(async (req) => {
         },
       }
     )
-    // Return user data in the same format as JWT payload
-    return {
-      sub: user.id,
-      email: user.email,
-      aud: user.aud,
-      role: user.role
-    }
+
   } catch (error) {
     console.error('❌ Error in Power BI embed function:', error.message)
 
