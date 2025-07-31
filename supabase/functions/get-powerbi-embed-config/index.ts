@@ -1,5 +1,4 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { createClient } from 'supabase'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*', 
@@ -143,43 +142,26 @@ async function generatePowerBIEmbedToken(accessToken: string, workspaceId: strin
 
   if (!response.ok) {
     const errorText = await response.text()
-    console.error('❌ Power BI embed token error:', errorText)
-    throw new Error(`Failed to generate embed token (${response.status}): ${errorText}`)
-  }
-
-  const embedTokenData: PowerBIEmbedTokenResponse = await response.json()
-  console.log('✅ Power BI embed token generated successfully')
-  
-  return embedTokenData
-}
-
-/**
- * Verifies Supabase JWT token using Supabase client
- */
-async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    throw new Error('Missing or invalid Authorization header')
-  }
-
-  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
-  
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase configuration')
-  }
-
-  const supabase = createClient(supabaseUrl, supabaseAnonKey)
-  
-  try {
-    // Get user from JWT token
-    const { data: { user }, error } = await supabase.auth.getUser(token)
-    
-    if (error || !user) {
-      throw new Error('Invalid token')
+async function getAuthenticatedUser(req: Request) {
+  // Create Supabase client with service role for JWT verification
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    {
+      global: {
+        headers: { Authorization: req.headers.get('Authorization')! },
+      },
     }
-    console.error(error);
-    console.error('❌ JWT verification failed:', error.message)
-    throw new Error('Invalid or expired token')
+  )
+
+  // Get the authenticated user
+  const { data: { user }, error } = await supabaseClient.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Authentication required')
   }
+
+  return user
 }
 
 /**
@@ -194,15 +176,14 @@ serve(async (req) => {
   try {
     console.log('📡 Power BI embed config request received')
 
-    // Verify authentication
-    const authHeader = req.headers.get('Authorization')
-    console.log('✅ JWT verified successfully for user:', user.id)
+    // Get authenticated user
+    const user = await getAuthenticatedUser(req)
     
-    // Extract user information from JWT
-    const userId = jwtPayload.sub
-    const userEmail = jwtPayload.email
+    console.log(`🔐 Authenticated request from user: ${user.email} (${user.id})`)
 
-    console.log(`🔐 Authenticated request from user: ${userEmail} (${userId})`)
+    // Extract user information
+    const userId = user.id
+    const userEmail = user.email
 
     // Get Power BI configuration from environment
     const workspaceId = Deno.env.get('POWERBI_WORKSPACE_ID')
