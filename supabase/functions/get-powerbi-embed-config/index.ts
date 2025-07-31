@@ -147,21 +147,7 @@ async function generatePowerBIEmbedToken(accessToken: string, workspaceId: strin
     const errorText = await response.text()
     console.error('❌ Power BI embed token error (response not ok):', response.status, errorText)
     throw new Error(`Failed to generate embed token (${response.status}): ${errorText}`)
-
-async function getAuthenticatedUser(req: Request) {
-  // Create Supabase client with service role for JWT verification
-  const supabaseClient = createClient(
-    Deno.env.get('SUPABASE_URL') ?? '',
-    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-    {
-      global: {
-        headers: { Authorization: req.headers.get('Authorization')! },
-      },
-    }
-  )
-
-  // Get the authenticated user
-  const { data: { user }, error } = await supabaseClient.auth.getUser()
+  }
 
   let embedTokenData
   try {
@@ -178,8 +164,30 @@ async function getAuthenticatedUser(req: Request) {
     console.error('❌ Embed token data is missing expected properties or malformed:', JSON.stringify(embedTokenData))
     throw new Error('Power BI embed token response is missing expected "token", "tokenId", or "expiration" properties')
   }
-  }
+
   console.log('✅ Power BI embed token generated successfully')
+
+  return embedTokenData
+}
+
+async function getAuthenticatedUser(req: Request) {
+  // Create Supabase client with service role for JWT verification
+  const supabaseClient = createClient(
+    Deno.env.get('SUPABASE_URL') ?? '',
+    Deno.env.get('SUPABASE_ANON_KEY') ?? '',
+    {
+      global: {
+        headers: { Authorization: req.headers.get('Authorization')! },
+      },
+    }
+  )
+
+  // Get the authenticated user
+  const { data: { user }, error } = await supabaseClient.auth.getUser()
+
+  if (error || !user) {
+    throw new Error('Invalid or expired token')
+  }
 
   return user
 }
