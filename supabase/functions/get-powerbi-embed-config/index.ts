@@ -174,25 +174,49 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   try {
     // Convert the base64 secret to a Uint8Array using Deno's native function
     const rawSecretBytes = decode(jwtSecret);
-
-    // Log raw bytes as hex string for debugging
-    console.log('DEBUG: rawSecretBytes (hex):', Array.from(rawSecretBytes).map(b => b.toString(16).padStart(2, '0')).join(''));
-    console.log(`DEBUG: token: '${token}'`);
+    // Try different approaches to pass the secret
+    console.log('DEBUG: Attempting verification with base64 string secret...')
     
-    // Create a CryptoKey object for HMAC-SHA256 operations
-    const cryptoKey = await crypto.subtle.importKey(
-      'raw',
-      rawSecretBytes,
-      { name: 'HMAC', hash: 'SHA-256' },
-      false,
-      ['verify']
-    );
+    // First try: Pass the base64 string directly
+    try {
+      const payload = await verify(token, jwtSecret)
+      console.log('✅ JWT verified successfully with base64 string secret')
+      return payload
+    } catch (error) {
+      console.log('❌ Base64 string verification failed:', error.message)
+    }
     
-    // Pass the CryptoKey to the verify function
-    const payload = await verify(token, cryptoKey);
-    console.log('✅ JWT verified successfully.', payload);
+    // Second try: Decode base64 and pass as Uint8Array
+    try {
+      const rawSecretBytes = decode(jwtSecret)
+      console.log('DEBUG: rawSecretBytes (hex):', Array.from(rawSecretBytes).map(b => b.toString(16).padStart(2, '0')).join(''))
+      
+      const payload = await verify(token, rawSecretBytes)
+      console.log('✅ JWT verified successfully with Uint8Array secret')
+      return payload
+    } catch (error) {
+      console.log('❌ Uint8Array verification failed:', error.message)
+    }
     
-    return payload
+    // Third try: Create CryptoKey and use that
+    try {
+      const rawSecretBytes = decode(jwtSecret)
+      const cryptoKey = await crypto.subtle.importKey(
+        'raw',
+        rawSecretBytes,
+        { name: 'HMAC', hash: 'SHA-256' },
+        false,
+        ['verify']
+      )
+      
+      const payload = await verify(token, cryptoKey)
+      console.log('✅ JWT verified successfully with CryptoKey')
+      return payload
+    } catch (error) {
+      console.log('❌ CryptoKey verification failed:', error.message)
+    // If all methods fail, throw an error
+    throw new Error('All JWT verification methods failed')
+    
   } catch (error) {
     console.error(error);
     console.error('❌ JWT verification failed:', error.message)
