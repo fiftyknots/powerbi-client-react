@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
 import { verify } from 'https://deno.land/x/djwt@v3.0.1/mod.ts'
-import { decodeBase64 } from 'https://deno.land/std@0.168.0/encoding/base64.ts'
+import { decode } from 'https://deno.land/std@0.168.0/encoding/base64.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*', 
@@ -173,7 +173,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
 
   try {
     // Convert the base64 secret to a Uint8Array using Deno's native function
-    const rawSecretBytes = decodeBase64(jwtSecret);
+    const rawSecretBytes = decode(jwtSecret);
 
     // Log raw bytes as hex string for debugging
     console.log('DEBUG: rawSecretBytes (hex):', Array.from(rawSecretBytes).map(b => b.toString(16).padStart(2, '0')).join(''));
