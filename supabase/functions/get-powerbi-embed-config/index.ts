@@ -214,6 +214,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
       return payload
     } catch (error) {
       console.log('❌ CryptoKey verification failed:', error.message)
+    }
     // If all methods fail, throw an error
     throw new Error('All JWT verification methods failed')
     
