@@ -175,7 +175,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   try {
     // Verify the JWT using jose and the remote JWK set
     const { payload } = await jwtVerify(token, JWKS)
-    
+    return payload;
   } catch (error) {
     console.error(error);
     console.error('❌ JWT verification failed:', error.message)
