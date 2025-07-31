@@ -1,5 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { jwtVerify, createRemoteJWKSet } from 'https://deno.land/x/jose@v4.15.5/index.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*', 
@@ -154,29 +154,28 @@ async function generatePowerBIEmbedToken(accessToken: string, workspaceId: strin
 }
 
 /**
- * Verifies Supabase JWT token using JWKS endpoint
+ * Verifies Supabase JWT token using Supabase client
  */
 async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     throw new Error('Missing or invalid Authorization header')
   }
 
-  const token = authHeader.substring(7) // Remove 'Bearer ' prefix
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')
+  
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error('Missing Supabase configuration')
+  }
 
-  // Supabase URL is available as an environment variable in Edge Functions
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')
-  // Construct the JWKS URL
-  const jwksUrl = new URL('/auth/v1/.well-known/jwks.json', supabaseUrl)
-  console.log('DEBUG: JWKS URL:', jwksUrl.toString())
-
-  // Create a remote JWK set
-  const JWKS = createRemoteJWKSet(jwksUrl)
-
+  const supabase = createClient(supabaseUrl, supabaseAnonKey)
+  
   try {
-    // Verify the JWT using jose and the remote JWK set
-    const { payload } = await jwtVerify(token, JWKS)
-    return payload;
-  } catch (error) {
+    // Get user from JWT token
+    const { data: { user }, error } = await supabase.auth.getUser(token)
+    
+    if (error || !user) {
+      throw new Error('Invalid token')
+    }
     console.error(error);
     console.error('❌ JWT verification failed:', error.message)
     throw new Error('Invalid or expired token')
@@ -197,7 +196,7 @@ serve(async (req) => {
 
     // Verify authentication
     const authHeader = req.headers.get('Authorization')
-    const jwtPayload = await verifySupabaseJWT(authHeader || '')
+    console.log('✅ JWT verified successfully for user:', user.id)
     
     // Extract user information from JWT
     const userId = jwtPayload.sub
@@ -263,7 +262,13 @@ serve(async (req) => {
         },
       }
     )
-
+    // Return user data in the same format as JWT payload
+    return {
+      sub: user.id,
+      email: user.email,
+      aud: user.aud,
+      role: user.role
+    }
   } catch (error) {
     console.error('❌ Error in Power BI embed function:', error.message)
 
