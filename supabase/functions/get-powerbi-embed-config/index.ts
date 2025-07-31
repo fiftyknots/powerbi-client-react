@@ -131,6 +131,8 @@ async function generatePowerBIEmbedToken(accessToken: string, workspaceId: strin
     }]
   }
 
+  console.log('📤 Sending request to Power BI API:', embedTokenUrl)
+  console.log('📤 Request body:', JSON.stringify(requestBody, null, 2))
   const response = await fetch(embedTokenUrl, {
     method: 'POST',
     headers: {
@@ -140,10 +142,11 @@ async function generatePowerBIEmbedToken(accessToken: string, workspaceId: strin
     body: JSON.stringify(requestBody),
   })
 
+  console.log(`📥 Power BI embed token API response status: ${response.status} ${response.statusText}`)
   if (!response.ok) {
     const errorText = await response.text()
-  }
-}
+    console.error('❌ Power BI embed token error (response not ok):', response.status, errorText)
+    throw new Error(`Failed to generate embed token (${response.status}): ${errorText}`)
 
 async function getAuthenticatedUser(req: Request) {
   // Create Supabase client with service role for JWT verification
@@ -160,9 +163,23 @@ async function getAuthenticatedUser(req: Request) {
   // Get the authenticated user
   const { data: { user }, error } = await supabaseClient.auth.getUser()
 
-  if (error || !user) {
-    throw new Error('Authentication required')
+  let embedTokenData
+  try {
+    embedTokenData = await response.json()
+    console.log('📥 Received raw embed token data:', JSON.stringify(embedTokenData, null, 2))
+  } catch (jsonError: any) {
+    const rawResponseText = await response.text()
+    console.error('❌ Error parsing embed token JSON response:', jsonError.message, 'Raw response:', rawResponseText)
+    throw new Error(`Failed to parse embed token response: ${jsonError.message}`)
   }
+  
+  // Validate the response structure
+  if (!embedTokenData || typeof embedTokenData.token !== 'string' || typeof embedTokenData.tokenId !== 'string' || typeof embedTokenData.expiration !== 'string') {
+    console.error('❌ Embed token data is missing expected properties or malformed:', JSON.stringify(embedTokenData))
+    throw new Error('Power BI embed token response is missing expected "token", "tokenId", or "expiration" properties')
+  }
+  }
+  console.log('✅ Power BI embed token generated successfully')
 
   return user
 }
