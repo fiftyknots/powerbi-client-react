@@ -1,6 +1,6 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { verify } from 'https://deno.land/x/djwt@v3.0.1/mod.ts'
 import { decode } from 'https://deno.land/std@0.168.0/encoding/base64.ts'
+import { jwtVerify } from 'https://deno.land/x/jose@v5.2.0/index.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*', 
@@ -169,13 +169,14 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
     throw new Error('Missing _SUPABASE_JWT_SECRET environment variable')
   }
 
-  console.log('DEBUG: jwtSecret from env: \'' + jwtSecret + '\'.');
+  console.log('DEBUG: jwtSecret from env (first 10 chars):', jwtSecret.substring(0, 10) + '...');
+  console.log('DEBUG: jwtSecret length:', jwtSecret.length);
 
   try {
-    // Convert the base64 secret to a Uint8Array using Deno's native function
+    // Decode the base64 secret into a Uint8Array
     const rawSecretBytes = decode(jwtSecret);
     // Try different approaches to pass the secret
-    console.log('DEBUG: Attempting verification with base64 string secret...')
+    // Log raw bytes as hex string for debugging
     
     // First try: Pass the base64 string directly
     try {
@@ -205,16 +206,11 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
         'raw',
         rawSecretBytes,
         { name: 'HMAC', hash: 'SHA-256' },
-        false,
-        ['verify']
-      )
-      
-      const payload = await verify(token, cryptoKey)
-      console.log('✅ JWT verified successfully with CryptoKey')
-      return payload
-    } catch (error) {
-      console.log('❌ CryptoKey verification failed:', error.message)
-    }
+    // Verify the JWT using jose
+    // jose's jwtVerify expects a Uint8Array for HMAC secrets
+    const { payload } = await jwtVerify(token, rawSecretBytes, {
+      algorithms: ['HS256'], // Specify the expected algorithm
+    });
     // If all methods fail, throw an error
     throw new Error('All JWT verification methods failed')
     
