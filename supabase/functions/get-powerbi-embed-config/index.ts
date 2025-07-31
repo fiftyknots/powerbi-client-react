@@ -206,6 +206,8 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
         'raw',
         rawSecretBytes,
         { name: 'HMAC', hash: 'SHA-256' },
+      )
+    }
     // Verify the JWT using jose
     // jose's jwtVerify expects a Uint8Array for HMAC secrets
     const { payload } = await jwtVerify(token, rawSecretBytes, {
