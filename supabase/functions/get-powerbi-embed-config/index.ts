@@ -175,7 +175,7 @@ async function verifySupabaseJWT(authHeader: string | null): Promise<any> {
   try {
     // Verify the JWT using jose and the remote JWK set
     const { payload } = await jwtVerify(token, JWKS, {
-      algorithms: ['RS256'], // Supabase typically uses RS256 for JWKS
+      algorithms: ['HS256'], // Supabase typically uses RS256 for JWKS
     })
     
   } catch (error) {
