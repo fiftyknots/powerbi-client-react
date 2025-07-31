@@ -142,6 +142,8 @@ async function generatePowerBIEmbedToken(accessToken: string, workspaceId: strin
 
   if (!response.ok) {
     const errorText = await response.text()
+  }
+}
 async function getAuthenticatedUser(req: Request) {
   // Create Supabase client with service role for JWT verification
   const supabaseClient = createClient(
